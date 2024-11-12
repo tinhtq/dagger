@@ -22,7 +22,7 @@ jobs:
       - name: Set up Dagger
         run: |
           curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=$HOME/.local/bin sh
-          ./bin/dagger version
+          dagger version
 
       # Step 3: Initialize Dagger pipeline and pull the PolySpace container from Docker Hub
       - name: Initialize Dagger and pull PolySpace container
