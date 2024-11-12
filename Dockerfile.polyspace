@@ -1,0 +1,78 @@
+# Dockerfile.policy
+# Define the MATLAB release for PolySpace installation
+ARG MATLAB_RELEASE=r2024b
+
+FROM ubuntu:22.04
+
+ARG MATLAB_RELEASE
+
+# Install dependencies
+ENV DEBIAN_FRONTEND="noninteractive" TZ="Etc/UTC"
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    libasound2 \
+    libc6 \
+    libcairo-gobject2 \
+    libcairo2 \
+    libcrypt1 \
+    libcups2 \
+    libdrm2 \
+    libgbm1 \
+    libgdk-pixbuf-2.0-0 \
+    libglib2.0-0 \
+    libgstreamer-plugins-base1.0-0 \
+    libgstreamer1.0-0 \
+    libgtk-3-0 \
+    libice6 \
+    libnspr4 \
+    libnss3 \
+    libpam0g \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libpangoft2-1.0-0 \
+    libuuid1 \
+    libwayland-client0 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxft2 \
+    libxinerama1 \
+    libxrandr2 \
+    libxt6 \
+    libxtst6 \
+    libxxf86vm1 \
+    locales \
+    locales-all \
+    zlib1g
+
+# Additional utilities
+RUN apt-get install --no-install-recommends --yes \
+        wget \
+        unzip \
+        sudo \
+        ca-certificates && \
+    apt-get clean && apt-get autoremove
+
+# Install Polyspace using MathWorks MPM installer
+RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \ 
+    chmod +x mpm && \
+    ./mpm install \
+        --release=${MATLAB_RELEASE} \
+        --destination=/opt/matlab \
+        --products Polyspace_Test && \
+    rm -f mpm /tmp/mathworks_root.log && \
+    ln -s /opt/matlab/polyspace/bin/polyspace* /usr/local/bin/
+
+# Create a "polyspace" user
+RUN adduser --shell /bin/bash --disabled-password --gecos "" polyspace && \
+    echo "polyspace ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/polyspace && \
+    chmod 0440 /etc/sudoers.d/polyspace
+
+# Configure license server for Polyspace
+ARG LICENSE_SERVER
+ENV MLM_LICENSE_FILE=$LICENSE_SERVER
+
+# Set the user and work directory
+USER polyspace
+WORKDIR /home/polyspace
+CMD []

@@ -1,6 +1,9 @@
 name: PolySpace MISRA Compliance Check
 
 on:
+  push:
+    branches:
+      - trigger
   pull_request:
     branches:
       - main
@@ -17,22 +20,24 @@ jobs:
 
       # Step 2: Set up Dagger (CLI version required)
       - name: Set up Dagger
-        uses: dagger/dagger-action@v1
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=$HOME/.local/bin sh
+          dagger version
 
       # Step 3: Initialize Dagger pipeline and pull the PolySpace container from Docker Hub
       - name: Initialize Dagger and pull PolySpace container
         run: |
           # Initialize the Dagger pipeline
-          dagger pipeline init
+          ./bin/dagger pipeline init
 
           # Pull the PolySpace container image from Docker Hub
-          dagger container pull docker.io/your-org/polyspace:latest --name polyspace-container
+          ./bin/dagger container pull docker.io/your-org/polyspace:latest --name polyspace-container
 
       # Step 4: Run PolySpace MISRA compliance check inside the container
       - name: Run MISRA check with PolySpace
         run: |
-          dagger container exec polyspace-container \
-            polyspace-bug-finder --misra-check -o output.sarif
+          ./bin/dagger container exec polyspace-container \
+          polyspace-bug-finder --misra-check -o output.sarif
 
       # Step 5: Convert SARIF to GitHub-compatible format (if needed)
       - name: Convert SARIF to GitHub standard (optional)
