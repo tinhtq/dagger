@@ -1,6 +1,9 @@
 name: PolySpace MISRA Compliance Check
 
 on:
+  push:
+    branches:
+      - trigger
   pull_request:
     branches:
       - main
@@ -17,7 +20,10 @@ jobs:
 
       # Step 2: Set up Dagger (CLI version required)
       - name: Set up Dagger
-        uses: dagger/dagger-action@v1
+        run: |
+          curl -L https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=latest sh
+        env:
+          DAGGER_VERSION: "latest"
 
       # Step 3: Initialize Dagger pipeline and pull the PolySpace container from Docker Hub
       - name: Initialize Dagger and pull PolySpace container
