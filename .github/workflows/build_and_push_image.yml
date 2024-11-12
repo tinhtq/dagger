@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "Dockerfile.policy" # Only triggers if Dockerfile.policy changes
+      - "Dockerfile.polyspace" # Only triggers if Dockerfile.policy changes
   workflow_dispatch: # Allows manual triggering
 
 jobs:
