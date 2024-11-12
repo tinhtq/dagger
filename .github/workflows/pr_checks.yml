@@ -21,9 +21,7 @@ jobs:
       # Step 2: Set up Dagger (CLI version required)
       - name: Set up Dagger
         run: |
-          curl -L https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=latest sh
-        env:
-          DAGGER_VERSION: "latest"
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=$HOME/.local/bin sh
 
       # Step 3: Initialize Dagger pipeline and pull the PolySpace container from Docker Hub
       - name: Initialize Dagger and pull PolySpace container
