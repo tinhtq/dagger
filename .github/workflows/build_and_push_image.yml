@@ -18,7 +18,7 @@ jobs:
         with:
           version: "latest"
           verb: call
-          module: github.com/daggerverse/dagger-ghcr-demo@v0.1.5
+          workdir: dagger
           args: build-and-push --registry=$DOCKER_REGISTRY --image-name=$DOCKER_IMAGE_NAME --username=$DOCKER_USERNAME --password=env:DOCKER_PASSWORD --build-context=github.com/daggerverse/dagger-ghcr-demo
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
         env:
