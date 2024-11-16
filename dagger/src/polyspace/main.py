@@ -20,7 +20,7 @@ class PublishToGHCR:
         # Build the Docker image
         built_image = (
             client.container()
-            .build(source, dockerfile="./Dockerfile")
+            .build(".", dockerfile="./Dockerfile")
             .with_label("version", "1.0.0")  # Optional: Add metadata
         )
 
