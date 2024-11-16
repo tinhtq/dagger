@@ -7,11 +7,11 @@ class PublishToGHCR:
     @function
     async def build_and_push(
         self,
-        source: dagger.Directory,
         registry: str,
         image_name: str,
         username: str,
         password: str,
+        source: dagger.Directory = ".",
     ) -> str:
         """Build a Docker image and push it to GHCR.io"""
 

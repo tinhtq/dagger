@@ -1,5 +1,5 @@
 {
-  "name": "polyspace",
+  "name": "dagger",
   "engineVersion": "v0.14.0",
   "sdk": "python",
   "source": "dagger"

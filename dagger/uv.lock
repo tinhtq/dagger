@@ -408,7 +408,7 @@ wheels = [
 ]
 
 [[package]]
-name = "polyspace"
+name = "dagger"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
