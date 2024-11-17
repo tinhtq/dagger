@@ -69,45 +69,8 @@ class FastapiDagger:
                 .with_exec(["flake8", "."])
             )
             try:
-                # Step 2: Capture scan results
                 scan_results = await container.stdout()
             except:
+                return f"Scan with error: ${scan_results}"
 
-                # Step 3: Push changes to a new branch (assuming no fixes are made)
-                git_container = (
-                    client.container()
-                    .from_("alpine/git")
-                    .with_exec(["git", "config", "--global", "user.name", "Dagger Bot"])
-                    .with_exec(
-                        ["git", "config", "--global", "user.email", "bot@dagger.io"]
-                    )
-                    .with_mounted_directory("/src", source)
-                    .with_workdir("/src")
-                    .with_exec(["git", "checkout", "-b", pr_branch])
-                    .with_exec(["git", "add", "."])
-                    .with_exec(["git", "commit", "-m", "Add scan results"])
-                    .with_exec(["git", "push", "origin", pr_branch])
-                )
-
-                await git_container.stdout()
-
-                # Step 4: Create a Pull Request using GitHub API
-                pr_data = {
-                    "title": "Scan Results: Fix Issues",
-                    "head": pr_branch,
-                    "base": base_branch,
-                    "body": f"## Scan Results\n\n```\n{scan_results}\n```",
-                }
-
-                headers = {"Authorization": f"Bearer {github_token}"}
-                pr_url = f"https://api.github.com/repos/{github_repo}/pulls"
-
-                async with httpx.AsyncClient() as http_client:
-                    response = await http_client.post(
-                        pr_url, json=pr_data, headers=headers
-                    )
-
-                if response.status_code == 201:
-                    return "Pull Request created successfully!"
-                else:
-                    return f"Failed to create PR: {response.text}"
+        return f"No Error"
