@@ -26,8 +26,6 @@ class FastapiDagger:
         self,
         registry: str,
         image_name: str,
-        username: str,
-        password: str,
         source: dagger.Directory,
     ) -> str:
         """Build a Docker image and push it to GHCR.io"""
@@ -39,13 +37,6 @@ class FastapiDagger:
             client.container()
             .build(source, dockerfile="./Dockerfile")
             .with_label("version", "1.0.0")  # Optional: Add metadata
-        )
-
-        # Log into the Docker registry
-        docker_registry = (
-            client.container()
-            .from_("docker")
-            .with_exec(["docker", "login", registry, "-u", username, "-p", password])
         )
 
         # Push the Docker image
