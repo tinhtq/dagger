@@ -18,7 +18,6 @@ jobs:
         with:
           version: "latest"
           verb: call
-          workdir: dagger
           args: build-and-push --registry=$DOCKER_REGISTRY --image-name=$DOCKER_IMAGE_NAME --username=$DOCKER_USERNAME --password=env:DOCKER_PASSWORD --source=.
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
         env:
