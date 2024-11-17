@@ -22,21 +22,21 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Call Dagger Function to build and publish to ghcr.io
-        uses: dagger/dagger-for-github@v6
-        with:
-          version: "latest"
-          verb: call
-          args: build-and-push --registry=$DOCKER_REGISTRY --image-name=$DOCKER_IMAGE_NAME --source=.
-          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
-        env:
-          DOCKER_REGISTRY: ghcr.io
-          DOCKER_IMAGE_NAME: ${{ github.repository }}
+      # - name: Call Dagger Function to build and publish to ghcr.io
+      #   uses: dagger/dagger-for-github@v6
+      #   with:
+      #     version: "latest"
+      #     verb: call
+      #     args: build-and-push --registry=$DOCKER_REGISTRY --image-name=$DOCKER_IMAGE_NAME --source=.
+      #     cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+      #   env:
+      #     DOCKER_REGISTRY: ghcr.io
+      #     DOCKER_IMAGE_NAME: ${{ github.repository }}
 
       - name: Scan the Code
         uses: dagger/dagger-for-github@v6
         with:
           version: "latest"
           verb: call
-          args: scan-and-pr --repo_owner=${{ github.repository_owner }} --image-name=${{ github.repository }} --github_token=${{ secrets.GITHUB_TOKEN }} --source=.
+          args: scan-and-pr --repo_owner=${{ github.repository_owner }} --repo_name=${{ github.repository }} --github_token=${{ secrets.GITHUB_TOKEN }} --source=.
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
