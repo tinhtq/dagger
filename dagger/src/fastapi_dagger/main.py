@@ -73,6 +73,7 @@ class FastapiDagger:
         headers = {
             "Authorization": f"Bearer {github_token}",
             "X-GitHub-Api-Version": "2022-11-28",
+            "Accept": "application/vnd.github+json",
         }
         comment_url = f"https://api.github.com/repos/{github_repo}/pulls/{pull_request_number}/comments"
 
