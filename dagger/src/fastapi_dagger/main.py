@@ -54,19 +54,17 @@ class FastapiDagger:
         """
         Scans the application for issues and creates a PR with the scan results.
         """
-        async with dagger.Connection() as client:
-            try:
-                container = (
-                    client.container()
-                    .from_("python:3.10")
-                    .with_mounted_directory("/src", source)
-                    .with_workdir("/src")
-                    .with_exec(
-                        ["pip", "install", "-r", "requirements.txt"]
-                    )  # Install deps
-                    .with_exec(["flake8", "app"])
-                )
-                await container.stdout()
-            except Exception as e:
-                return f"Scan Result: ${e}"
+        client = dagger.Client()
+        try:
+            container = (
+                client.container()
+                .from_("python:3.10")
+                .with_mounted_directory("/src", source)
+                .with_workdir("/src")
+                .with_exec(["pip", "install", "-r", "requirements.txt"])  # Install deps
+                .with_exec(["flake8", "app"])
+            )
+            await container.stdout()
+        except Exception as e:
+            return f"Scan Result: ${e}"
         return "No Error"
