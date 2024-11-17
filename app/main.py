@@ -2,6 +2,8 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
+a
+
 
 @app.get("/")
 def read_root():

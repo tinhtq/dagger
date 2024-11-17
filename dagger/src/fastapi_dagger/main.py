@@ -60,22 +60,18 @@ class FastapiDagger:
         """
 
         async with dagger.Connection() as client:
+            container = (
+                client.container()
+                .from_("python:3.10")
+                .with_mounted_directory("/src", source)
+                .with_workdir("/src")
+                .with_exec(["pip", "install", "-r", "requirements.txt"])  # Install deps
+                .with_exec(["flake8", "."])
+            )
             try:
-
-                container = (
-                    client.container()
-                    .from_("python:3.10")
-                    .with_mounted_directory("/src", source)
-                    .with_workdir("/src")
-                    .with_exec(
-                        ["pip", "install", "-r", "requirements.txt"]
-                    )  # Install deps
-                    .with_exec(["flake8", "."])  # Run static analysis (e.g., Flake8)
-                )
-            except Exception as e:
-
                 # Step 2: Capture scan results
-                scan_results = str(e)
+                scan_results = await container.stdout()
+            except:
 
                 # Step 3: Push changes to a new branch (assuming no fixes are made)
                 git_container = (
