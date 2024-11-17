@@ -54,7 +54,6 @@ class FastapiDagger:
         """
         Scans the application for issues and creates a PR with the scan results.
         """
-        scan_results = ""
         async with dagger.Connection() as client:
             container = (
                 client.container()
@@ -68,3 +67,4 @@ class FastapiDagger:
                 await container.stdout()
             except Exception as e:
                 return f"Scan Result: ${e}"
+        return "No Error"
