@@ -32,3 +32,11 @@ jobs:
         env:
           DOCKER_REGISTRY: ghcr.io
           DOCKER_IMAGE_NAME: ${{ github.repository }}
+
+      - name: Scan the Code
+        uses: dagger/dagger-for-github@v6
+        with:
+          version: "latest"
+          verb: call
+          args: scan-and-pr --repo_owner=${{ github.repository_owner }} --image-name=${{ github.repository }} --github_token=${{ secrets.GITHUB_TOKEN }} --source=.
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
