@@ -28,7 +28,7 @@ class FastapiDagger:
         image_name: str,
         username: str,
         password: str,
-        source: dagger.Directory = ".",
+        source: dagger.Directory,
     ) -> str:
         """Build a Docker image and push it to GHCR.io"""
 
