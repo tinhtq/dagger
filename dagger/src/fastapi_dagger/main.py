@@ -75,7 +75,7 @@ class FastapiDagger:
             "X-GitHub-Api-Version": "2022-11-28",
             "Accept": "application/vnd.github+json",
         }
-        comment_url = f"https://api.github.com/repos/{github_repo}/pulls/{pull_request_number}/comments"
+        comment_url = f"https://api.github.com/repos/{github_repo}/issues/{pull_request_number}/comments"
 
         async with httpx.AsyncClient() as http_client:
             response = await http_client.post(
