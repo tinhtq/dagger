@@ -66,4 +66,4 @@ class FastapiDagger:
             )  # Run flake8 and ignore errors
         )
         scan_results = await container.stdout()
-        return f"Scan Results: ${scan_results}"
+        return f"Scan Results: {scan_results}"
