@@ -50,15 +50,11 @@ class FastapiDagger:
     async def scan_and_pr(
         self,
         source: dagger.Directory,
-        github_repo: str,
-        github_token: str,
-        base_branch: str = "main",
-        pr_branch: str = "scan-fix",
     ) -> str:
         """
         Scans the application for issues and creates a PR with the scan results.
         """
-
+        scan_results = ""
         async with dagger.Connection() as client:
             container = (
                 client.container()
@@ -66,11 +62,9 @@ class FastapiDagger:
                 .with_mounted_directory("/src", source)
                 .with_workdir("/src")
                 .with_exec(["pip", "install", "-r", "requirements.txt"])  # Install deps
-                .with_exec(["flake8", "."])
+                .with_exec(["flake8", "app"])
             )
             try:
-                scan_results = await container.stdout()
-            except:
-                return f"Scan with error: ${scan_results}"
-
-        return f"No Error"
+                await container.stdout()
+            except Exception as e:
+                return f"Scan Result: ${e}"

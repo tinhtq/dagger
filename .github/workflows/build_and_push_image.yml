@@ -38,5 +38,5 @@ jobs:
         with:
           version: "latest"
           verb: call
-          args: scan-and-pr --github_repo=${{ github.repository }} --github_token=${{ secrets.GITHUB_TOKEN }} --source=.
+          args: scan-and-pr --source=.
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
