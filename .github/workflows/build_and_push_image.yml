@@ -1,7 +1,8 @@
 name: dagger
 on:
-  push:
-    branches: [main]
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-publish:
@@ -38,5 +39,9 @@ jobs:
         with:
           version: "latest"
           verb: call
-          args: scan-and-pr --source=.
+          args: scan-and-pr --pull_request_number=$PR_NUMBER --github_repo=$GITHUB_REPOSITORY --github_token=$GITHUB_TOKEN --source=.
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}

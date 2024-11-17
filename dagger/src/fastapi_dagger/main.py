@@ -49,6 +49,9 @@ class FastapiDagger:
     @function
     async def scan_and_pr(
         self,
+        pull_request_number: str,
+        github_repo: str,
+        github_token: str,
         source: dagger.Directory,
     ) -> str:
         """
@@ -66,4 +69,16 @@ class FastapiDagger:
             )  # Run flake8 and ignore errors
         )
         scan_results = await container.stdout()
-        return f"Scan Results: {scan_results}"
+        comment_body = {"body": f"## Scan Results\n\n```\n{scan_results}\n```"}
+        headers = {"Authorization": f"Bearer {github_token}"}
+        comment_url = f"https://api.github.com/repos/{github_repo}/issues/{pull_request_number}/comments"
+
+        async with httpx.AsyncClient() as http_client:
+            response = await http_client.post(
+                comment_url, json=comment_body, headers=headers
+            )
+
+        if response.status_code == 201:
+            return "Comment posted successfully!"
+        else:
+            return f"Failed to post comment: {response.text}"
