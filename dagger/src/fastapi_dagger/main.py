@@ -50,8 +50,7 @@ class FastapiDagger:
     async def scan_and_pr(
         self,
         source: dagger.Directory,
-        repo_owner: str,
-        repo_name: str,
+        github_repo: str,
         github_token: str,
         base_branch: str = "main",
         pr_branch: str = "scan-fix",
@@ -99,7 +98,7 @@ class FastapiDagger:
             }
 
             headers = {"Authorization": f"Bearer {github_token}"}
-            pr_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls"
+            pr_url = f"https://api.github.com/repos/{github_repo}/pulls"
 
             async with httpx.AsyncClient() as http_client:
                 response = await http_client.post(pr_url, json=pr_data, headers=headers)
