@@ -1,0 +1,5 @@
+{
+  "name": "fastapi-dagger",
+  "sdk": "go",
+  "source": "."
+}
