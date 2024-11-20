@@ -7,22 +7,21 @@ import (
 	"io"
 	"log"
 
-	"github.com/dagger/dagger/client"
+	"dagger.io/dagger"
 	"github.com/go-resty/resty/v2"
 )
 
 type FastapiDagger struct{}
 
-func (f *FastapiDagger) scanAndPR(
-	ctx context.Context, 
-	pullRequestNumber string, 
-	githubRepo string, 
-	githubToken string, 
-	source *client.Directory,
+func (m *FastapiDagger) ScanAndPR(
+	ctx context.Context,
+	pullRequestNumber string,
+	githubRepo string,
+	githubToken string,
+	source *dagger.Directory,
 ) (string, error) {
 	// Create Dagger client
-
-	cl, err := client.New(ctx)
+	cl, err := dagger.Connect(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to create dagger client: %v", err)
 	}
@@ -31,7 +30,7 @@ func (f *FastapiDagger) scanAndPR(
 	// Create container and run scan
 	container := cl.Container().
 		From("python:3.10").
-		WithMountedDirectory("/src", source).
+		WithDirectory("/src", source).
 		WithWorkdir("/src").
 		WithExec([]string{"pip", "install", "-r", "requirements.txt"}).
 		WithExec([]string{"sh", "-c", "flake8 app || true"})
@@ -65,4 +64,8 @@ func (f *FastapiDagger) scanAndPR(
 	}
 
 	return fmt.Sprintf("Failed to post comment: %s", resp.String()), nil
+}
+
+func main() {
+	log.Println("Dagger module initialized")
 }
