@@ -1,17 +1,3 @@
-// A generated module for FastapiDagger functions
-//
-// This module has been generated via dagger init and serves as a reference to
-// basic module structure as you get started with Dagger.
-//
-// Two functions have been pre-created. You can modify, delete, or add to them,
-// as needed. They demonstrate usage of arguments and return types using simple
-// echo and grep commands. The functions can be called from the dagger CLI or
-// from one of the SDKs.
-//
-// The first line in this comment block is a short description line and the
-// rest is a long description with more detail on the module's purpose or usage,
-// if appropriate. All modules should have a short description.
-
 package main
 
 import (
@@ -20,15 +6,16 @@ import (
 	"io"
 	"strings"
 
-	"dagger/fastapi-dagger/internal/dagger"
 	"net/http"
+
+	"dagger.io/dagger"
 )
 
 type FastapiDagger struct{}
 
 // ContainerEcho returns a container that echoes the provided string argument.
 func (f *FastapiDagger) ContainerEcho(ctx context.Context, stringArg string) (*dagger.Container, error) {
-	client, err := dagger.Connect(ctx, dagger.WithLogOutput(io.Discard))
+	client, err := dagger.Connect(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +29,7 @@ func (f *FastapiDagger) ContainerEcho(ctx context.Context, stringArg string) (*d
 
 // GrepDir returns lines that match a pattern in the files of the provided directory.
 func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory, pattern string) (string, error) {
-	client, err := dagger.Connect(ctx, dagger.WithLogOutput(io.Discard))
+	client, err := dagger.Connect(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -64,7 +51,7 @@ func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory
 
 // BuildAndPush builds a Docker image and pushes it to a container registry.
 func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName string, source *dagger.Directory) (string, error) {
-	client, err := dagger.Connect(ctx, dagger.WithLogOutput(io.Discard))
+	client, err := dagger.Connect(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -85,7 +72,7 @@ func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName st
 
 // ScanAndPR scans the application for issues and posts the results as a comment on a GitHub pull request.
 func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, githubRepo, githubToken string, source *dagger.Directory) (string, error) {
-	client, err := dagger.Connect(ctx, dagger.WithLogOutput(io.Discard))
+	client, err := dagger.Connect(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -127,4 +114,33 @@ func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, github
 
 	body, _ := io.ReadAll(resp.Body)
 	return "", fmt.Errorf("failed to post comment: %s", string(body))
+}
+
+func main() {
+	ctx := context.Background()
+	f := &FastapiDagger{}
+
+	// Example usage (replace with actual values)
+	registry := "ghcr.io"
+	imageName := "example-image"
+	source := &dagger.Directory{}
+	githubRepo := "user/repo"
+	githubToken := "your_github_token"
+	prNumber := "1"
+
+	// Build and Push Example
+	result, err := f.BuildAndPush(ctx, registry, imageName, source)
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Println(result)
+	}
+
+	// Scan and PR Example
+	scanResult, err := f.ScanAndPR(ctx, prNumber, githubRepo, githubToken, source)
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Println(scanResult)
+	}
 }
