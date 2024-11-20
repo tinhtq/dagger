@@ -87,11 +87,13 @@ func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, github
 		WithExec([]string{"pip", "install", "-r", "requirements.txt"}).
 		WithExec([]string{"sh", "-c", "flake8 app || true"})
 
+	// Fetch the results of the scan
 	scanResults, err := container.Stdout(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to get scan results: %w", err)
 	}
 
+	// Post scan results to GitHub PR as a comment
 	commentBody := fmt.Sprintf("## Scan Results\n\n```\n%s\n```", scanResults)
 	commentURL := fmt.Sprintf("https://api.github.com/repos/%s/issues/%s/comments", githubRepo, pullRequestNumber)
 	reqBody := fmt.Sprintf(`{"body": %q}`, commentBody)
