@@ -70,7 +70,11 @@ class FastapiDagger:
         )
         scan_results = await container.stdout()
         comment_body = {"body": f"## Scan Results\n\n```\n{scan_results}\n```"}
-        headers = {"Authorization": f"Bearer {github_token}"}
+        headers = {
+            "Authorization": f"Bearer {github_token}",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "Accept": "application/vnd.github+json",
+        }
         comment_url = f"https://api.github.com/repos/{github_repo}/issues/{pull_request_number}/comments"
 
         async with httpx.AsyncClient() as http_client:
