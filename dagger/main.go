@@ -120,9 +120,6 @@ func main() {
 	ctx := context.Background()
 	f := &FastapiDagger{}
 
-	registry := "ghcr.io"
-	imageName := "example-image"
-
 	client, err := dagger.Connect(ctx)
 	if err != nil {
 		fmt.Printf("Failed to connect to Dagger: %s\n", err)
@@ -130,7 +127,9 @@ func main() {
 	}
 	defer client.Close()
 
-	source := client.Host().Directory(".") // Current working directory
+	source := client.Host().Directory(".")
+	registry := "ghcr.io"
+	imageName := "example-image"
 
 	githubRepo := os.Getenv("GITHUB_REPOSITORY")
 	githubToken := os.Getenv("GITHUB_TOKEN")
