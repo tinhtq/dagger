@@ -4,6 +4,8 @@ app = FastAPI()
 
 a
 
+b
+
 
 @app.get("/")
 def read_root():
