@@ -1,3 +1,4 @@
-/sdk
-/.venv
-/**/__pycache__
+/dagger.gen.go
+/internal/dagger
+/internal/querybuilder
+/internal/telemetry

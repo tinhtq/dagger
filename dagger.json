@@ -1,6 +1,6 @@
 {
   "name": "fastapi-dagger",
   "engineVersion": "v0.14.0",
-  "sdk": "python",
+  "sdk": "go",
   "source": "dagger"
 }
