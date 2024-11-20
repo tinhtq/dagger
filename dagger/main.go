@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -15,7 +16,7 @@ type FastapiDagger struct{}
 
 // ContainerEcho returns a container that echoes the provided string argument.
 func (f *FastapiDagger) ContainerEcho(ctx context.Context, stringArg string) (*dagger.Container, error) {
-	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
+	client, err := dagger.Connect(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Dagger client: %w", err)
 	}
@@ -30,7 +31,7 @@ func (f *FastapiDagger) ContainerEcho(ctx context.Context, stringArg string) (*d
 
 // GrepDir returns lines that match a pattern in the files of the provided directory.
 func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory, pattern string) (string, error) {
-	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
+	client, err := dagger.Connect(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to connect to Dagger client: %w", err)
 	}
@@ -52,7 +53,7 @@ func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory
 
 // BuildAndPush builds a Docker image and pushes it to a container registry.
 func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName string, source *dagger.Directory) (string, error) {
-	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
+	client, err := dagger.Connect(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to connect to Dagger client: %w", err)
 	}
@@ -73,7 +74,7 @@ func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName st
 
 // ScanAndPR scans the application for issues and posts the results as a comment on a GitHub pull request.
 func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, githubRepo, githubToken string, source *dagger.Directory) (string, error) {
-	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
+	client, err := dagger.Connect(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to connect to Dagger client: %w", err)
 	}
@@ -121,24 +122,31 @@ func main() {
 	ctx := context.Background()
 	f := &FastapiDagger{}
 
+	// Initialize Dagger client
+	client, err := dagger.Connect(ctx)
+	if err != nil {
+		log.Fatalf("Failed to connect to Dagger client: %v", err)
+	}
+	defer client.Close()
+
+	source := client.Host().Directory(".") // Current working directory
+
 	// Environment variables
 	registry := "ghcr.io"
 	imageName := "example-image"
-	source := dagger.Host().Directory(".") // Current working directory
-
 	githubRepo := os.Getenv("GITHUB_REPOSITORY")
 	githubToken := os.Getenv("GITHUB_TOKEN")
 	prNumber := os.Getenv("PR_NUMBER")
 
 	if githubRepo == "" || githubToken == "" || prNumber == "" {
-		fmt.Println("Please set the environment variables: GITHUB_REPOSITORY, GITHUB_TOKEN, PR_NUMBER")
+		log.Println("Please set the environment variables: GITHUB_REPOSITORY, GITHUB_TOKEN, PR_NUMBER")
 		return
 	}
 
 	fmt.Println("Starting Build and Push...")
 	result, err := f.BuildAndPush(ctx, registry, imageName, source)
 	if err != nil {
-		fmt.Printf("Build and Push Error: %s\n", err)
+		log.Printf("Build and Push Error: %s\n", err)
 	} else {
 		fmt.Println(result)
 	}
@@ -146,7 +154,7 @@ func main() {
 	fmt.Println("Starting Scan and PR...")
 	scanResult, err := f.ScanAndPR(ctx, prNumber, githubRepo, githubToken, source)
 	if err != nil {
-		fmt.Printf("Scan and PR Error: %s\n", err)
+		log.Printf("Scan and PR Error: %s\n", err)
 	} else {
 		fmt.Println(scanResult)
 	}
