@@ -1,6 +1,6 @@
 name: dagger
 on:
-  push:
+  pull_request:
     branches:
       - golang
 
