@@ -64,7 +64,7 @@ func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName st
 		WithLabel("version", "1.0.0")
 
 	imageURL := fmt.Sprintf("%s/%s:latest", registry, imageName)
-	err = image.Publish(ctx, imageURL)
+	_, err = image.Publish(ctx, imageURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to publish image: %w", err)
 	}
@@ -80,7 +80,6 @@ func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, github
 	}
 	defer client.Close()
 
-	// Run the flake8 command inside the container
 	container := client.Container().
 		From("python:3.10").
 		WithMountedDirectory("/src", source).
@@ -88,19 +87,11 @@ func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, github
 		WithExec([]string{"pip", "install", "-r", "requirements.txt"}).
 		WithExec([]string{"flake8", "app"})
 
-	// Get scan results
 	scanResults, err := container.Stdout(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to run flake8: %w", err)
 	}
 
-	// Check if scan results are empty
-	if strings.TrimSpace(scanResults) == "" {
-		fmt.Println("No issues found in the code.")
-		return "No issues found in the code.", nil
-	}
-
-	// Prepare and send GitHub comment
 	commentBody := fmt.Sprintf("## Scan Results\n\n```\n%s\n```", scanResults)
 	commentURL := fmt.Sprintf("https://api.github.com/repos/%s/issues/%s/comments", githubRepo, pullRequestNumber)
 	reqBody := fmt.Sprintf(`{"body": %q}`, commentBody)
@@ -131,21 +122,19 @@ func main() {
 	ctx := context.Background()
 	f := &FastapiDagger{}
 
-	// Get environment variables
 	registry := "ghcr.io"
 	imageName := "example-image"
-	source := dagger.Host().Directory(".") // Get the current working directory
+	source := dagger.Host().Directory(".") // Current working directory
 
-	githubRepo := os.Getenv("GITHUB_REPO")
+	githubRepo := os.Getenv("GITHUB_REPOSITORY")
 	githubToken := os.Getenv("GITHUB_TOKEN")
 	prNumber := os.Getenv("PR_NUMBER")
 
 	if githubRepo == "" || githubToken == "" || prNumber == "" {
-		fmt.Println("Please set the environment variables: GITHUB_REPO, GITHUB_TOKEN, PR_NUMBER")
+		fmt.Println("Please set the environment variables: GITHUB_REPOSITORY, GITHUB_TOKEN, PR_NUMBER")
 		return
 	}
 
-	// Build and Push Example
 	fmt.Println("Starting Build and Push...")
 	result, err := f.BuildAndPush(ctx, registry, imageName, source)
 	if err != nil {
@@ -154,7 +143,6 @@ func main() {
 		fmt.Println(result)
 	}
 
-	// Scan and PR Example
 	fmt.Println("Starting Scan and PR...")
 	scanResult, err := f.ScanAndPR(ctx, prNumber, githubRepo, githubToken, source)
 	if err != nil {
