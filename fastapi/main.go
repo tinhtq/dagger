@@ -1,31 +1,61 @@
+// A Dagger module to say hello to the world
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"log"
+	"hello/internal/dagger"
+	// "strings"
 
-	"dagger.io/dagger"
 	"github.com/go-resty/resty/v2"
 )
 
-type FastapiDagger struct{}
+// var defaultFigletContainer = dag.
+// 	Container().
+// 	From("alpine:latest").
+// 	WithExec([]string{
+// 		"apk", "add", "figlet",
+// 	})
 
-func (m *FastapiDagger) ScanAndPR(
+// A Dagger module to say hello to the world!
+type Fastapi struct{}
+
+// Say hello to the world!
+// func (fastapi *Fastapi) Scan(ctx context.Context,
+// 	greeting string,
+// 	name string,
+// 	giant bool,
+// 	shout bool,
+// 	source *dagger.Directory
+// ) (string, error) {
+// 	container := source.
+// 	WithExec([]string{"pip", "install", "-r", "requirements.txt"}).
+// 	WithExec([]string{"sh", "-c", "flake8 app || true"})
+
+// 	stdout, err := container.Stdout(ctx)
+// 	if err != nil {
+// 		return "", fmt.Errorf("scan failed: %v", err)
+// 	}
+
+// 	return stdout, nil
+// }
+
+func (m *Fastapi) Scan(
 	ctx context.Context,
 	pullRequestNumber string,
 	githubRepo string,
 	githubToken string,
+	// prn string,
+	// githubrepo string,
+	// githubtoken string,
 	source *dagger.Directory,
 ) (string, error) {
 	// Create Dagger client
-	cl, err := dagger.Connect(ctx)
-	if err != nil {
-		return "", fmt.Errorf("failed to create dagger client: %v", err)
-	}
-	defer cl.Close()
+	cl := dagger.Connect()
+	// if err != nil {
+	// 	return "", fmt.Errorf("failed to create dagger client: %v", err)
+	// }
+	// defer cl.Close()
 
 	// Create container and run scan
 	container := cl.Container().
@@ -64,8 +94,4 @@ func (m *FastapiDagger) ScanAndPR(
 	}
 
 	return fmt.Sprintf("Failed to post comment: %s", resp.String()), nil
-}
-
-func main() {
-	log.Println("Dagger module initialized")
 }

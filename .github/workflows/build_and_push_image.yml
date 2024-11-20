@@ -7,9 +7,9 @@ on:
 jobs:
   build-publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    # permissions:
+    #   contents: read
+    #   packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,20 +54,6 @@ jobs:
       #     IMAGE_NAME: ${{ github.repository }}
       #   run: go run ./main.go
 
-      - name: Scan the Code
-        uses: dagger/dagger-for-github@v6
-        with:
-          version: "0.9.10"
-          # version: "latest"
-          verb: call
-          module: ./fastapi-dagger
-          args: scanAndPR --pull_request_number=$PR_NUMBER --github_repo=$GITHUB_REPOSITORY --github_token=$GITHUB_TOKEN --source=.
-          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
-        env:
-          PR_NUMBER: ${{ github.event.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-
       # - name: Call Dagger Function
       #   uses: dagger/dagger-for-github@v6
       #   with:
@@ -76,3 +62,19 @@ jobs:
       #     module: ./hello
       #     args: hello --greeting="bonjour" --name="monde"
       #     cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+
+      - name: Scan the Code
+        uses: dagger/dagger-for-github@v6
+        with:
+          # version: "0.9.10"
+          version: "latest"
+          verb: call
+          module: ./fastapi
+          args: scan --pull_request_number=$PR_NUMBER --githubRepo=$GITHUB_REPOSITORY --githubToken=$GITHUB_TOKEN --source=.
+          # args: scan --greeting="bonjour" --name="monde"
+          # args: scan --source=.
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
