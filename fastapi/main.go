@@ -5,57 +5,22 @@ import (
 	"context"
 	"fmt"
 	"hello/internal/dagger"
-	// "strings"
-
 	"github.com/go-resty/resty/v2"
 )
-
-// var defaultFigletContainer = dag.
-// 	Container().
-// 	From("alpine:latest").
-// 	WithExec([]string{
-// 		"apk", "add", "figlet",
-// 	})
 
 // A Dagger module to say hello to the world!
 type Fastapi struct{}
 
-// Say hello to the world!
-// func (fastapi *Fastapi) Scan(ctx context.Context,
-// 	greeting string,
-// 	name string,
-// 	giant bool,
-// 	shout bool,
-// 	source *dagger.Directory
-// ) (string, error) {
-// 	container := source.
-// 	WithExec([]string{"pip", "install", "-r", "requirements.txt"}).
-// 	WithExec([]string{"sh", "-c", "flake8 app || true"})
-
-// 	stdout, err := container.Stdout(ctx)
-// 	if err != nil {
-// 		return "", fmt.Errorf("scan failed: %v", err)
-// 	}
-
-// 	return stdout, nil
-// }
-
+// Scan and put comment to the PR
 func (m *Fastapi) Scan(
 	ctx context.Context,
 	pullRequestNumber string,
 	githubRepo string,
 	githubToken string,
-	// prn string,
-	// githubrepo string,
-	// githubtoken string,
 	source *dagger.Directory,
 ) (string, error) {
 	// Create Dagger client
 	cl := dagger.Connect()
-	// if err != nil {
-	// 	return "", fmt.Errorf("failed to create dagger client: %v", err)
-	// }
-	// defer cl.Close()
 
 	// Create container and run scan
 	container := cl.Container().
