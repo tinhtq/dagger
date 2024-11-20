@@ -18,13 +18,14 @@ type FastapiDagger struct{}
 func (f *FastapiDagger) ContainerEcho(ctx context.Context, stringArg string) (*dagger.Container, error) {
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to dagger client: %w", err)
+		return nil, fmt.Errorf("failed to connect to Dagger client: %w", err)
 	}
 	defer client.Close()
 
 	container := client.Container().
 		From("alpine:latest").
 		WithExec([]string{"echo", stringArg})
+
 	return container, nil
 }
 
@@ -32,7 +33,7 @@ func (f *FastapiDagger) ContainerEcho(ctx context.Context, stringArg string) (*d
 func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory, pattern string) (string, error) {
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
-		return "", fmt.Errorf("failed to connect to dagger client: %w", err)
+		return "", fmt.Errorf("failed to connect to Dagger client: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +45,7 @@ func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory
 
 	stdout, err := container.Stdout(ctx)
 	if err != nil {
-		return "", fmt.Errorf("failed to execute grep: %w", err)
+		return "", fmt.Errorf("failed to get stdout: %w", err)
 	}
 
 	return stdout, nil
@@ -54,7 +55,7 @@ func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory
 func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName string, source *dagger.Directory) (string, error) {
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
-		return "", fmt.Errorf("failed to connect to dagger client: %w", err)
+		return "", fmt.Errorf("failed to connect to Dagger client: %w", err)
 	}
 	defer client.Close()
 
@@ -75,7 +76,7 @@ func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName st
 func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, githubRepo, githubToken string, source *dagger.Directory) (string, error) {
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
-		return "", fmt.Errorf("failed to connect to dagger client: %w", err)
+		return "", fmt.Errorf("failed to connect to Dagger client: %w", err)
 	}
 	defer client.Close()
 
@@ -88,7 +89,7 @@ func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, github
 
 	scanResults, err := container.Stdout(ctx)
 	if err != nil {
-		return "", fmt.Errorf("failed to execute flake8 scan: %w", err)
+		return "", fmt.Errorf("failed to get scan results: %w", err)
 	}
 
 	commentBody := fmt.Sprintf("## Scan Results\n\n```\n%s\n```", scanResults)
@@ -121,16 +122,17 @@ func main() {
 	ctx := context.Background()
 	f := &FastapiDagger{}
 
-	// Environment variables
+	// Example usage (replace with actual values)
+	registry := "ghcr.io"
+	imageName := "example-image"
+	source := dagger.Host().Directory(".") // Get the current working directory
+
 	githubRepo := os.Getenv("GITHUB_REPO")
 	githubToken := os.Getenv("GITHUB_TOKEN")
 	prNumber := os.Getenv("PR_NUMBER")
-	registry := "ghcr.io"
-	imageName := "example-image"
-	source := dagger.Host().Directory(".") // Current working directory
 
 	if githubRepo == "" || githubToken == "" || prNumber == "" {
-		fmt.Println("Environment variables GITHUB_REPO, GITHUB_TOKEN, and PR_NUMBER must be set.")
+		fmt.Println("Please set the environment variables: GITHUB_REPO, GITHUB_TOKEN, PR_NUMBER")
 		return
 	}
 
