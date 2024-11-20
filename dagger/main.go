@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"strings"
-
-	"net/http"
 
 	"dagger.io/dagger"
 )
@@ -59,15 +58,17 @@ func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName st
 	}
 	defer client.Close()
 
-	image := client.Container().Build(source).WithLabel("version", "1.0.0")
+	image := client.Container().
+		Build(source).
+		WithLabel("version", "1.0.0")
 
 	imageURL := fmt.Sprintf("%s/%s:latest", registry, imageName)
-	publishedImage, err := image.Publish(ctx, imageURL)
+	_, err = image.Publish(ctx, imageURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to publish image: %w", err)
 	}
 
-	return fmt.Sprintf("Image successfully pushed to %s", publishedImage), nil
+	return fmt.Sprintf("Image successfully pushed to %s", imageURL), nil
 }
 
 // ScanAndPR scans the application for issues and posts the results as a comment on a GitHub pull request.
@@ -120,16 +121,10 @@ func main() {
 	ctx := context.Background()
 	f := &FastapiDagger{}
 
-	client, err := dagger.Connect(ctx)
-	if err != nil {
-		fmt.Printf("Failed to connect to Dagger: %s\n", err)
-		return
-	}
-	defer client.Close()
-
-	source := client.Host().Directory(".")
+	// Environment variables
 	registry := "ghcr.io"
 	imageName := "example-image"
+	source := dagger.Host().Directory(".") // Current working directory
 
 	githubRepo := os.Getenv("GITHUB_REPOSITORY")
 	githubToken := os.Getenv("GITHUB_TOKEN")
