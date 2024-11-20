@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 
 	"net/http"
@@ -15,7 +16,7 @@ type FastapiDagger struct{}
 
 // ContainerEcho returns a container that echoes the provided string argument.
 func (f *FastapiDagger) ContainerEcho(ctx context.Context, stringArg string) (*dagger.Container, error) {
-	client, err := dagger.Connect(ctx)
+	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +30,7 @@ func (f *FastapiDagger) ContainerEcho(ctx context.Context, stringArg string) (*d
 
 // GrepDir returns lines that match a pattern in the files of the provided directory.
 func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory, pattern string) (string, error) {
-	client, err := dagger.Connect(ctx)
+	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
 		return "", err
 	}
@@ -51,7 +52,7 @@ func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory
 
 // BuildAndPush builds a Docker image and pushes it to a container registry.
 func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName string, source *dagger.Directory) (string, error) {
-	client, err := dagger.Connect(ctx)
+	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
 		return "", err
 	}
@@ -72,7 +73,7 @@ func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName st
 
 // ScanAndPR scans the application for issues and posts the results as a comment on a GitHub pull request.
 func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, githubRepo, githubToken string, source *dagger.Directory) (string, error) {
-	client, err := dagger.Connect(ctx)
+	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
 		return "", err
 	}
@@ -123,12 +124,19 @@ func main() {
 	// Example usage (replace with actual values)
 	registry := "ghcr.io"
 	imageName := "example-image"
-	source := &dagger.Directory{}
-	githubRepo := "user/repo"
-	githubToken := "your_github_token"
-	prNumber := "1"
+	source := dagger.Host().Directory(".") // Get the current working directory
+
+	githubRepo := os.Getenv("GITHUB_REPO")
+	githubToken := os.Getenv("GITHUB_TOKEN")
+	prNumber := os.Getenv("PR_NUMBER")
+
+	if githubRepo == "" || githubToken == "" || prNumber == "" {
+		fmt.Println("Please set the environment variables: GITHUB_REPO, GITHUB_TOKEN, PR_NUMBER")
+		return
+	}
 
 	// Build and Push Example
+	fmt.Println("Starting Build and Push...")
 	result, err := f.BuildAndPush(ctx, registry, imageName, source)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -137,6 +145,7 @@ func main() {
 	}
 
 	// Scan and PR Example
+	fmt.Println("Starting Scan and PR...")
 	scanResult, err := f.ScanAndPR(ctx, prNumber, githubRepo, githubToken, source)
 	if err != nil {
 		fmt.Println("Error:", err)
