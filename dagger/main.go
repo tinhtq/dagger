@@ -18,7 +18,7 @@ type FastapiDagger struct{}
 func (f *FastapiDagger) ContainerEcho(ctx context.Context, stringArg string) (*dagger.Container, error) {
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to dagger client: %w", err)
 	}
 	defer client.Close()
 
@@ -32,7 +32,7 @@ func (f *FastapiDagger) ContainerEcho(ctx context.Context, stringArg string) (*d
 func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory, pattern string) (string, error) {
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to connect to dagger client: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory
 
 	stdout, err := container.Stdout(ctx)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to execute grep: %w", err)
 	}
 
 	return stdout, nil
@@ -54,7 +54,7 @@ func (f *FastapiDagger) GrepDir(ctx context.Context, directory *dagger.Directory
 func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName string, source *dagger.Directory) (string, error) {
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to connect to dagger client: %w", err)
 	}
 	defer client.Close()
 
@@ -65,7 +65,7 @@ func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName st
 	imageURL := fmt.Sprintf("%s/%s:latest", registry, imageName)
 	err = image.Publish(ctx, imageURL)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to publish image: %w", err)
 	}
 
 	return fmt.Sprintf("Image successfully pushed to %s", imageURL), nil
@@ -75,7 +75,7 @@ func (f *FastapiDagger) BuildAndPush(ctx context.Context, registry, imageName st
 func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, githubRepo, githubToken string, source *dagger.Directory) (string, error) {
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to connect to dagger client: %w", err)
 	}
 	defer client.Close()
 
@@ -88,7 +88,7 @@ func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, github
 
 	scanResults, err := container.Stdout(ctx)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to execute flake8 scan: %w", err)
 	}
 
 	commentBody := fmt.Sprintf("## Scan Results\n\n```\n%s\n```", scanResults)
@@ -97,7 +97,7 @@ func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, github
 
 	req, err := http.NewRequest("POST", commentURL, strings.NewReader(reqBody))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", githubToken))
 	req.Header.Set("Content-Type", "application/json")
@@ -105,7 +105,7 @@ func (f *FastapiDagger) ScanAndPR(ctx context.Context, pullRequestNumber, github
 	clientHTTP := &http.Client{}
 	resp, err := clientHTTP.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to post comment: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -121,17 +121,16 @@ func main() {
 	ctx := context.Background()
 	f := &FastapiDagger{}
 
-	// Example usage (replace with actual values)
-	registry := "ghcr.io"
-	imageName := "example-image"
-	source := dagger.Host().Directory(".") // Get the current working directory
-
+	// Environment variables
 	githubRepo := os.Getenv("GITHUB_REPO")
 	githubToken := os.Getenv("GITHUB_TOKEN")
 	prNumber := os.Getenv("PR_NUMBER")
+	registry := "ghcr.io"
+	imageName := "example-image"
+	source := dagger.Host().Directory(".") // Current working directory
 
 	if githubRepo == "" || githubToken == "" || prNumber == "" {
-		fmt.Println("Please set the environment variables: GITHUB_REPO, GITHUB_TOKEN, PR_NUMBER")
+		fmt.Println("Environment variables GITHUB_REPO, GITHUB_TOKEN, and PR_NUMBER must be set.")
 		return
 	}
 
@@ -139,7 +138,7 @@ func main() {
 	fmt.Println("Starting Build and Push...")
 	result, err := f.BuildAndPush(ctx, registry, imageName, source)
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Printf("Build and Push Error: %s\n", err)
 	} else {
 		fmt.Println(result)
 	}
@@ -148,7 +147,7 @@ func main() {
 	fmt.Println("Starting Scan and PR...")
 	scanResult, err := f.ScanAndPR(ctx, prNumber, githubRepo, githubToken, source)
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Printf("Scan and PR Error: %s\n", err)
 	} else {
 		fmt.Println(scanResult)
 	}
